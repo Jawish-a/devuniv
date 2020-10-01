@@ -11,6 +11,7 @@
 namespace Carbon\Traits;
 
 use Carbon\CarbonInterface;
+use DateTimeInterface;
 
 /**
  * Trait Options.
@@ -35,14 +36,14 @@ trait Options
     /**
      * First day of week.
      *
-     * @var int
+     * @var int|string
      */
     protected static $weekStartsAt = CarbonInterface::MONDAY;
 
     /**
      * Last day of week.
      *
-     * @var int
+     * @var int|string
      */
     protected static $weekEndsAt = CarbonInterface::SUNDAY;
 
@@ -63,11 +64,11 @@ trait Options
      */
     protected static $regexFormats = [
         'd' => '(3[01]|[12][0-9]|0[1-9])',
-        'D' => '([a-zA-Z]{3})',
+        'D' => '(Sun|Mon|Tue|Wed|Thu|Fri|Sat)',
         'j' => '([123][0-9]|[1-9])',
         'l' => '([a-zA-Z]{2,})',
         'N' => '([1-7])',
-        'S' => '([a-zA-Z]{2})',
+        'S' => '(st|nd|rd|th)',
         'w' => '([0-6])',
         'z' => '(36[0-5]|3[0-5][0-9]|[12][0-9]{2}|[1-9]?[0-9])',
         'W' => '(5[012]|[1-4][0-9]|[1-9])',
@@ -91,17 +92,17 @@ trait Options
         's' => '([0-5][0-9])',
         'u' => '([0-9]{1,6})',
         'v' => '([0-9]{1,3})',
-        'e' => '([a-zA-Z]{1,5})|([a-zA-Z]*\/[a-zA-Z]*)',
+        'e' => '([a-zA-Z]{1,5})|([a-zA-Z]*\\/[a-zA-Z]*)',
         'I' => '(0|1)',
-        'O' => '([\+\-](1[012]|0[0-9])[0134][05])',
-        'P' => '([\+\-](1[012]|0[0-9]):[0134][05])',
+        'O' => '([+-](1[012]|0[0-9])[0134][05])',
+        'P' => '([+-](1[012]|0[0-9]):[0134][05])',
         'T' => '([a-zA-Z]{1,5})',
         'Z' => '(-?[1-5]?[0-9]{1,4})',
         'U' => '([0-9]*)',
 
         // The formats below are combinations of the above formats.
-        'c' => '(([1-9]?[0-9]{4})\-(1[012]|0[1-9])\-(3[01]|[12][0-9]|0[1-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])[\+\-](1[012]|0[0-9]):([0134][05]))', // Y-m-dTH:i:sP
-        'r' => '(([a-zA-Z]{3}), ([123][0-9]|[1-9]) ([a-zA-Z]{3}) ([1-9]?[0-9]{4}) (2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9]) [\+\-](1[012]|0[0-9])([0134][05]))', // D, j M Y H:i:s O
+        'c' => '(([1-9]?[0-9]{4})-(1[012]|0[1-9])-(3[01]|[12][0-9]|0[1-9])T(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])[+-](1[012]|0[0-9]):([0134][05]))', // Y-m-dTH:i:sP
+        'r' => '(([a-zA-Z]{3}), ([123][0-9]|0[1-9]) ([a-zA-Z]{3}) ([1-9]?[0-9]{4}) (2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9]) [+-](1[012]|0[0-9])([0134][05]))', // D, d M Y H:i:s O
     ];
 
     /**
@@ -343,7 +344,7 @@ trait Options
      *
      * @param array $settings
      *
-     * @return $this
+     * @return $this|static
      */
     public function settings(array $settings)
     {
@@ -356,7 +357,7 @@ trait Options
         $this->localMacros = $settings['macros'] ?? null;
         $this->localGenericMacros = $settings['genericMacros'] ?? null;
         $this->localFormatFunction = $settings['formatFunction'] ?? null;
-        $date = $this;
+
         if (isset($settings['locale'])) {
             $locales = $settings['locale'];
 
@@ -364,13 +365,14 @@ trait Options
                 $locales = [$locales];
             }
 
-            $date = $date->locale(...$locales);
-        }
-        if (isset($settings['timezone'])) {
-            $date = $date->shiftTimezone($settings['timezone']);
+            $this->locale(...$locales);
         }
 
-        return $date;
+        if (isset($settings['timezone'])) {
+            return $this->shiftTimezone($settings['timezone']);
+        }
+
+        return $this;
     }
 
     /**
@@ -402,5 +404,39 @@ trait Options
         }
 
         return $settings;
+    }
+
+    /**
+     * Show truthy properties on var_dump().
+     *
+     * @return array
+     */
+    public function __debugInfo()
+    {
+        $infos = array_filter(get_object_vars($this), function ($var) {
+            return $var;
+        });
+
+        foreach (['dumpProperties', 'constructedObjectId'] as $property) {
+            if (isset($infos[$property])) {
+                unset($infos[$property]);
+            }
+        }
+
+        // @codeCoverageIgnoreStart
+
+        if ($this instanceof CarbonInterface || $this instanceof DateTimeInterface) {
+            if (!isset($infos['date'])) {
+                $infos['date'] = $this->format(CarbonInterface::MOCK_DATETIME_FORMAT);
+            }
+
+            if (!isset($infos['timezone'])) {
+                $infos['timezone'] = $this->tzName;
+            }
+        }
+
+        // @codeCoverageIgnoreEnd
+
+        return $infos;
     }
 }

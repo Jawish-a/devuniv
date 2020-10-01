@@ -13,15 +13,16 @@ namespace Symfony\Component\HttpKernel\Debug;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Exception\ExceptionInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Formats debug file links.
  *
  * @author Jérémy Romey <jeremy@free-agent.fr>
+ *
+ * @final
  */
-class FileLinkFormatter implements \Serializable
+class FileLinkFormatter
 {
     private $fileLinkFormat;
     private $requestStack;
@@ -36,7 +37,7 @@ class FileLinkFormatter implements \Serializable
         $fileLinkFormat = $fileLinkFormat ?: ini_get('xdebug.file_link_format') ?: get_cfg_var('xdebug.file_link_format');
         if ($fileLinkFormat && !\is_array($fileLinkFormat)) {
             $i = strpos($f = $fileLinkFormat, '&', max(strrpos($f, '%f'), strrpos($f, '%l'))) ?: \strlen($f);
-            $fileLinkFormat = [substr($f, 0, $i)] + preg_split('/&([^>]++)>/', substr($f, $i), -1, PREG_SPLIT_DELIM_CAPTURE);
+            $fileLinkFormat = [substr($f, 0, $i)] + preg_split('/&([^>]++)>/', substr($f, $i), -1, \PREG_SPLIT_DELIM_CAPTURE);
         }
 
         $this->fileLinkFormat = $fileLinkFormat;
@@ -45,7 +46,7 @@ class FileLinkFormatter implements \Serializable
         $this->urlFormat = $urlFormat;
     }
 
-    public function format($file, $line)
+    public function format(string $file, int $line)
     {
         if ($fmt = $this->getFileLinkFormat()) {
             for ($i = 1; isset($fmt[$i]); ++$i) {
@@ -64,27 +65,21 @@ class FileLinkFormatter implements \Serializable
     /**
      * @internal
      */
-    public function serialize()
+    public function __sleep(): array
     {
-        return serialize($this->getFileLinkFormat());
+        $this->fileLinkFormat = $this->getFileLinkFormat();
+
+        return ['fileLinkFormat'];
     }
 
     /**
      * @internal
      */
-    public function unserialize($serialized)
-    {
-        $this->fileLinkFormat = unserialize($serialized, ['allowed_classes' => false]);
-    }
-
-    /**
-     * @internal
-     */
-    public static function generateUrlFormat(UrlGeneratorInterface $router, $routeName, $queryString)
+    public static function generateUrlFormat(UrlGeneratorInterface $router, string $routeName, string $queryString): ?string
     {
         try {
             return $router->generate($routeName).$queryString;
-        } catch (ExceptionInterface $e) {
+        } catch (\Throwable $e) {
             return null;
         }
     }
@@ -94,18 +89,18 @@ class FileLinkFormatter implements \Serializable
         if ($this->fileLinkFormat) {
             return $this->fileLinkFormat;
         }
+
         if ($this->requestStack && $this->baseDir && $this->urlFormat) {
             $request = $this->requestStack->getMasterRequest();
-            if ($request instanceof Request) {
-                if ($this->urlFormat instanceof \Closure && !$this->urlFormat = ($this->urlFormat)()) {
-                    return;
-                }
 
+            if ($request instanceof Request && (!$this->urlFormat instanceof \Closure || $this->urlFormat = ($this->urlFormat)())) {
                 return [
-                    $request->getSchemeAndHttpHost().$request->getBasePath().$this->urlFormat,
+                    $request->getSchemeAndHttpHost().$this->urlFormat,
                     $this->baseDir.\DIRECTORY_SEPARATOR, '',
                 ];
             }
         }
+
+        return null;
     }
 }

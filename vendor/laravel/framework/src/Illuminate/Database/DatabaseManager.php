@@ -2,11 +2,12 @@
 
 namespace Illuminate\Database;
 
-use PDO;
+use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Support\Arr;
+use Illuminate\Support\ConfigurationUrlParser;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
-use Illuminate\Database\Connectors\ConnectionFactory;
+use PDO;
 
 /**
  * @mixin \Illuminate\Database\Connection
@@ -68,7 +69,7 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * Get a database connection instance.
      *
-     * @param  string  $name
+     * @param  string|null  $name
      * @return \Illuminate\Database\Connection
      */
     public function connection($name = null)
@@ -148,10 +149,11 @@ class DatabaseManager implements ConnectionResolverInterface
         $connections = $this->app['config']['database.connections'];
 
         if (is_null($config = Arr::get($connections, $name))) {
-            throw new InvalidArgumentException("Database [{$name}] not configured.");
+            throw new InvalidArgumentException("Database connection [{$name}] not configured.");
         }
 
-        return $config;
+        return (new ConfigurationUrlParser)
+                    ->parseConfiguration($config);
     }
 
     /**
@@ -184,7 +186,7 @@ class DatabaseManager implements ConnectionResolverInterface
      * Prepare the read / write mode for database connection instance.
      *
      * @param  \Illuminate\Database\Connection  $connection
-     * @param  string  $type
+     * @param  string|null  $type
      * @return \Illuminate\Database\Connection
      */
     protected function setPdoForType(Connection $connection, $type = null)
@@ -201,7 +203,7 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * Disconnect from the given database and remove from local cache.
      *
-     * @param  string  $name
+     * @param  string|null  $name
      * @return void
      */
     public function purge($name = null)
@@ -216,7 +218,7 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * Disconnect from the given database.
      *
-     * @param  string  $name
+     * @param  string|null  $name
      * @return void
      */
     public function disconnect($name = null)
@@ -229,7 +231,7 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * Reconnect to the given database.
      *
-     * @param  string  $name
+     * @param  string|null  $name
      * @return \Illuminate\Database\Connection
      */
     public function reconnect($name = null)
@@ -244,6 +246,24 @@ class DatabaseManager implements ConnectionResolverInterface
     }
 
     /**
+     * Set the default database connection for the callback execution.
+     *
+     * @param  string  $name
+     * @param  callable  $callback
+     * @return mixed
+     */
+    public function usingConnection($name, callable $callback)
+    {
+        $previousName = $this->getDefaultConnection();
+
+        $this->setDefaultConnection($name);
+
+        return tap($callback(), function () use ($previousName) {
+            $this->setDefaultConnection($previousName);
+        });
+    }
+
+    /**
      * Refresh the PDO connections on a given connection.
      *
      * @param  string  $name
@@ -254,8 +274,8 @@ class DatabaseManager implements ConnectionResolverInterface
         $fresh = $this->makeConnection($name);
 
         return $this->connections[$name]
-                                ->setPdo($fresh->getPdo())
-                                ->setReadPdo($fresh->getReadPdo());
+                                ->setPdo($fresh->getRawPdo())
+                                ->setReadPdo($fresh->getRawReadPdo());
     }
 
     /**
@@ -305,7 +325,7 @@ class DatabaseManager implements ConnectionResolverInterface
     /**
      * Register an extension connection resolver.
      *
-     * @param  string    $name
+     * @param  string  $name
      * @param  callable  $resolver
      * @return void
      */
@@ -339,7 +359,7 @@ class DatabaseManager implements ConnectionResolverInterface
      * Dynamically pass methods to the default connection.
      *
      * @param  string  $method
-     * @param  array   $parameters
+     * @param  array  $parameters
      * @return mixed
      */
     public function __call($method, $parameters)

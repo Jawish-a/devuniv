@@ -1,6 +1,27 @@
 CHANGELOG
 =========
 
+5.1.0
+-----
+
+ * added `RdKafka` support
+
+4.4.0
+-----
+
+ * added `VarDumperTestTrait::setUpVarDumper()` and `VarDumperTestTrait::tearDownVarDumper()`
+   to configure casters & flags to use in tests
+ * added `ImagineCaster` and infrastructure to dump images
+ * added the stamps of a message after it is dispatched in `TraceableMessageBus` and `MessengerDataCollector` collected data
+ * added `UuidCaster`
+ * made all casters final
+ * added support for the `NO_COLOR` env var (https://no-color.org/)
+
+4.3.0
+-----
+
+ * added `DsCaster` to support dumping the contents of data structures from the Ds extension
+
 4.2.0
 -----
 
@@ -20,9 +41,9 @@ CHANGELOG
  * support for passing `\ReflectionClass` instances to the `Caster::castObject()`
    method has been dropped, pass class names as strings instead
  * the `Data::getRawData()` method has been removed
- * the `VarDumperTestTrait::assertDumpEquals()` method expects a 3rd `$context = null`
+ * the `VarDumperTestTrait::assertDumpEquals()` method expects a 3rd `$filter = 0`
    argument and moves `$message = ''` argument at 4th position.
- * the `VarDumperTestTrait::assertDumpMatchesFormat()` method expects a 3rd `$context = null`
+ * the `VarDumperTestTrait::assertDumpMatchesFormat()` method expects a 3rd `$filter = 0`
    argument and moves `$message = ''` argument at 4th position.
 
 3.4.0
@@ -34,4 +55,4 @@ CHANGELOG
 2.7.0
 -----
 
- * deprecated Cloner\Data::getLimitedClone(). Use withMaxDepth, withMaxItemsPerDepth or withRefHandles instead.
+ * deprecated `Cloner\Data::getLimitedClone()`. Use `withMaxDepth`, `withMaxItemsPerDepth` or `withRefHandles` instead.

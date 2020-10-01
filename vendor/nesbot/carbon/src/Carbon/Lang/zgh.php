@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-/**
+/*
  * Authors:
  * - BAKTETE Miloud
  */
 return [
     'year' => ':count ⵓⵙⴳⴳⵯⴰⵙ|:count ⵉⵙⴳⴳⵓⵙⴰ',
-    'a_year' => 'un an|:count ⵉⵙⴳⴳⵓⵙⴰ',
-    'y' => ':count an|:count ⵉⵙⴳⴳⵓⵙⴰ',
+    'a_year' => 'ⵓⵙⴳⴳⵯⴰⵙ|:count ⵉⵙⴳⴳⵓⵙⴰ',
+    'y' => ':count ⵓⵙⴳⴳⵯⴰⵙ|:count ⵉⵙⴳⴳⵓⵙⴰ',
     'month' => ':count ⵡⴰⵢⵢⵓⵔ|:count ⴰⵢⵢⵓⵔⵏ',
     'a_month' => 'ⵉⴷⵊ ⵡⴰⵢⵢⵓⵔ|:count ⴰⵢⵢⵓⵔⵏ',
     'm' => ':count ⴰⵢⵢⵓⵔⵏ',
@@ -40,8 +40,12 @@ return [
     'after' => ':time ⴰⵡⴰⵔ',
     'before' => ':time ⴷⴰⵜ',
     'diff_now' => 'ⴰⴷⵡⴰⵍⵉ',
+    'diff_today' => 'ⴰⵙⵙ',
+    'diff_today_regexp' => 'ⴰⵙⵙ(?:\\s+ⴰ/ⴰⴷ)?(?:\\s+ⴳ)?',
     'diff_yesterday' => 'ⴰⵙⵙⵏⵏⴰⵟ',
+    'diff_yesterday_regexp' => 'ⴰⵙⵙⵏⵏⴰⵟ(?:\\s+ⴳ)?',
     'diff_tomorrow' => 'ⴰⵙⴽⴽⴰ',
+    'diff_tomorrow_regexp' => 'ⴰⵙⴽⴽⴰ(?:\\s+ⴳ)?',
     'diff_before_yesterday' => 'ⴼⵔ ⵉⴹⵏⵏⴰⵟ',
     'diff_after_tomorrow' => 'ⵏⴰⴼ ⵓⵙⴽⴽⴰ',
     'period_recurrences' => ':count ⵜⵉⴽⴽⴰⵍ',
