@@ -47,6 +47,7 @@ class CourseController extends Controller
         $course = new Course();
         $course->courseTitle = $request->courseTitle;
         $course->courseShortDescription = $request->courseShortDescription;
+        $course->courseSlug = $request->courseSlug;
         $course->courseDescription = $request->courseDescription;
         $course->courseLanguage = $request->courseLanguage;
         $course->category_id = $request->category_id;
@@ -74,7 +75,7 @@ class CourseController extends Controller
     {
         //
 
-        return view('course.view', ['course' => Course::findOrFail($course->id)]);
+        return view('course.view', ['course' => Course::where('courseSlug', '=', $course->courseSlug)->firstOrFail()]);
     }
 
     /**

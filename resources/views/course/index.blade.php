@@ -14,7 +14,7 @@
         <div class="col-lg-4">
             <div class="card mb-4 py-3 border-bottom-primary">
                 <div class="card-body text-center">
-                    <a href="{{url("/admin/course/{$course->id} ")}}">
+                    <a href="{{url("/admin/course/{$course->courseSlug} ")}}">
                         <h5 class="text-primary">{{$course->courseTitle}}</h5>
                     </a>
                     <hr>
