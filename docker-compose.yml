@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+
+  mysql:
+    container_name: devuniv_mysql
+    image: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_USER: root
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DB: devuniv
+    volumes:
+      - mysql-volume:/var/lib/mysql
+
+  webapp:
+    container_name: devuniv_webapp
+    build: .
+    volumes:
+      - .:/var/www/html/
+    ports:
+      - "80:80"
+    stdin_open: true
+    tty: true
+
+volumes:
+  mysql-volume:
+
