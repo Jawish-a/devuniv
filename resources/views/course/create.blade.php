@@ -28,6 +28,11 @@
                     <textarea class="form-control  border-1" name="courseDescription" id="courseDescription" cols="30" rows="10" required placeholder="Insert Course Descreption"></textarea>
                 </div>
                 <div class="form-group">
+                    <label for="courseSlug">Course Slug</label>
+                    <input type="text" class="form-control  border-1" name="courseSlug" id="courseSlug" placeholder="Insert Course Slug"
+                           required>
+                </div>
+                <div class="form-group">
                     <label for="category_id">Category</label>
                     <select class="form-control  border-1" name="category_id" id="category_id" required>
                         <option value="0" default >No parent</option>

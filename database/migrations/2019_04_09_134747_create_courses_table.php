@@ -17,6 +17,7 @@ class CreateCoursesTable extends Migration
             $table->bigIncrements('id');
             $table->string('courseTitle');
             $table->string('courseShortDescription');
+            $table->string('courseSlug');
             $table->longText('courseDescription');
             $table->string('courseLanguage')->default('ar');
             $table->integer('category_id');
