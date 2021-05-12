@@ -25,6 +25,6 @@
     },
     "dependencies": {
         "autonumeric": "^4.5.4",
-        "quill": "^1.3.6"
+        "quill": "^1.3.7"
     }
 }
